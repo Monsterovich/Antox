@@ -3,6 +3,7 @@ package chat.tox.antox;
 import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 
@@ -40,6 +41,10 @@ public class SplashActivity extends AppCompatActivity implements EasyPermissions
         }
 
         getPermissions();
+
+        // fixes crash on openning images
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
     }
 
     public void startAntox()
