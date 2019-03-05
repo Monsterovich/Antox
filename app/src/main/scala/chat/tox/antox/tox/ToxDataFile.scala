@@ -45,7 +45,7 @@ class ToxDataFile(ctx: Context, fileName: String) {
   private val TAG = LoggerTag(getClass.getName)
 
   def getFile(): File = {
-    return new File(ctx.getExternalFilesDir(null).getPath() + File.separator + fileName)
+    return new File(ctx.getExternalFilesDir(null).getPath() + File.separator + fileName + ".tox")
   }
 
   def isEncrypted: Boolean = {
