@@ -44,8 +44,12 @@ class ToxDataFile(ctx: Context, fileName: String) {
 
   private val TAG = LoggerTag(getClass.getName)
 
+  def getFile(): File = {
+    return new File(ctx.getExternalFilesDir(null).getPath() + File.separator + fileName)
+  }
+
   def isEncrypted: Boolean = {
-    ToxDataFile.isEncrypted(ctx.getFileStreamPath(fileName))
+    ToxDataFile.isEncrypted(getFile())
   }
 
   def decrypt(pass: String): Unit = {
@@ -58,7 +62,7 @@ class ToxDataFile(ctx: Context, fileName: String) {
 
   def doesFileExist(): Boolean = {
     AntoxLog.debug("fileName: " + fileName, TAG)
-    val selfFile = ctx.getFileStreamPath(fileName)
+    val selfFile = getFile()
     if (selfFile == null) {
       AntoxLog.debug("selfFile is null!", TAG)
     }
@@ -70,16 +74,16 @@ class ToxDataFile(ctx: Context, fileName: String) {
       throw new IllegalArgumentException("dest must exist")
     }
 
-    FileUtils.copy(ctx.getFileStreamPath(fileName), new File(dest + "/" + fileName + ".tox"))
+    FileUtils.copy(getFile(), new File(dest + "/" + fileName + ".tox"))
   }
 
   def deleteFile() {
-    ctx.deleteFile(fileName)
+    getFile().delete()
   }
 
   def loadFile(): Array[Byte] = {
     var fin: FileInputStream = null
-    val file = ctx.getFileStreamPath(fileName)
+    val file = getFile()
     var data: Array[Byte] = null
     try {
       fin = new FileInputStream(file)
@@ -103,7 +107,7 @@ class ToxDataFile(ctx: Context, fileName: String) {
 
   def loadEncryptedFile(pass: String): Array[Byte] = {
     var fin: FileInputStream = null
-    val file = ctx.getFileStreamPath(fileName)
+    val file = getFile()
     var data: Array[Byte] = null
     try {
       fin = new FileInputStream(file)
@@ -134,7 +138,7 @@ class ToxDataFile(ctx: Context, fileName: String) {
   }
 
   def saveFile(dataToBeSaved: Array[Byte]) {
-    val myFile = ctx.getFileStreamPath(fileName)
+    val myFile = getFile()
     try {
       myFile.createNewFile()
     } catch {
