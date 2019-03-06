@@ -155,6 +155,9 @@ class CallActivity extends FragmentActivity with CallReplySelectedListener {
         MessageHelper.sendMessage(this, activeKey.asInstanceOf[FriendKey], reply, ToxMessageType.NORMAL, None)
 
       case None =>
+        // this should fix undefined theme bug
+        val mainIntent = new Intent(this, classOf[MainActivity])
+        startActivity(mainIntent)
         val intent = AntoxNotificationManager.createChatIntent(this, Constants.SWITCH_TO_FRIEND, classOf[ChatActivity], activeKey)
         startActivity(intent)
     }
