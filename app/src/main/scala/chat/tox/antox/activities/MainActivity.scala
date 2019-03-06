@@ -14,6 +14,30 @@ import chat.tox.antox.fragments.MainDrawerFragment
 import chat.tox.antox.theme.ThemeManager
 import chat.tox.antox.utils._
 
+import android.app.Activity
+import android.content.Intent
+import android.os.Bundle
+
+object ExitActivity {
+  def exitApplicationAndRemoveFromRecent(context: Context): Unit = {
+    val intent = new Intent(context, classOf[ExitActivity])
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS | Intent.FLAG_ACTIVITY_NO_ANIMATION)
+    context.startActivity(intent)
+  }
+}
+
+class ExitActivity extends Activity {
+  override protected def onCreate(savedInstanceState: Bundle): Unit = {
+    super.onCreate(savedInstanceState)
+    if (android.os.Build.VERSION.SDK_INT >= 21) {
+      finishAndRemoveTask()
+    }
+    else {
+      finish()
+    }
+  }
+}
+
 class MainActivity extends AppCompatActivity {
 
 
@@ -88,10 +112,11 @@ class MainActivity extends AppCompatActivity {
     if (drawerFragment.isDrawerOpen) {
       drawerFragment.closeDrawer()
     } else {
+      ExitActivity.exitApplicationAndRemoveFromRecent(this)
       super.onBackPressed()
     }
   }
-
+  
   override def onPause() {
     super.onPause()
   }
@@ -117,7 +142,7 @@ class MainActivity extends AppCompatActivity {
   /**
     * Checks to see if Wifi or Mobile have a network connection
     */
-  private def isNetworkConnected: Boolean = {
+  private def isNetworkConnected = {
     val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE).asInstanceOf[ConnectivityManager]
     val networkInfo = connectivityManager.getAllNetworkInfo
 
