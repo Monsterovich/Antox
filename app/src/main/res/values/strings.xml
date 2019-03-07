@@ -202,6 +202,7 @@
     <string name="attachment_takephoto">Take photo</string>
     <string name="message_copy">Copy message</string>
     <string name="message_delete">Delete message</string>
+    <string name="message_resend">Resend message</string>
     <string name="file_delete">Delete file</string>
     <string name="file_open">Open file</string>
     <string name="filetransfer_cancel">Cancel Filetransfer</string>

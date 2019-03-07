@@ -10,6 +10,7 @@ import chat.tox.antox.R
 import chat.tox.antox.data.State
 import chat.tox.antox.utils.UiUtils
 import chat.tox.antox.wrapper.MessageType
+import chat.tox.antox.tox.MessageHelper
 import rx.lang.scala.Observable
 import rx.lang.scala.schedulers.IOScheduler
 
@@ -61,7 +62,19 @@ class TextMessageHolder(val view: View) extends GenericMessageHolder(view) with 
   }
 
   override def onLongClick(view: View): Boolean = {
-    val items = Array[CharSequence](context.getResources.getString(R.string.message_copy), context.getResources.getString(R.string.message_delete))
+    var items = Array[CharSequence](null)
+    if (msg.isMine && !msg.received) {
+      items = Array[CharSequence](
+        context.getResources.getString(R.string.message_copy),
+        context.getResources.getString(R.string.message_delete),
+        context.getResources.getString(R.string.message_resend)
+      )
+    } else {
+      items = Array[CharSequence](
+        context.getResources.getString(R.string.message_copy),
+        context.getResources.getString(R.string.message_delete)
+      )
+    }
     isLongClick = true
     new AlertDialog.Builder(context).setCancelable(true).setItems(items, new DialogInterface.OnClickListener() {
 
@@ -69,8 +82,14 @@ class TextMessageHolder(val view: View) extends GenericMessageHolder(view) with 
         case 0 =>
           val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
           clipboard.setPrimaryClip(ClipData.newPlainText(null, msg.message))
-
         case 1 =>
+          Observable[Boolean](subscriber => {
+            val db = State.db
+            db.deleteMessage(msg.id)
+            subscriber.onCompleted()
+          }).subscribeOn(IOScheduler()).subscribe()
+        case 2 =>
+          MessageHelper.sendUnsentMessage(context, msg)
           Observable[Boolean](subscriber => {
             val db = State.db
             db.deleteMessage(msg.id)

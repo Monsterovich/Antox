@@ -138,4 +138,15 @@ object MessageHelper {
       }
     }
   }
+
+  def sendUnsentMessage(ctx: Context, msg : Message): Unit = {
+    msg.key match {
+      case key: FriendKey =>
+        sendMessage(ctx, key, msg.message,
+          MessageType.toToxMessageType(msg.`type`), None)
+      case key: GroupKey =>
+        sendGroupMessage(ctx, key, msg.message,
+          MessageType.toToxMessageType(msg.`type`), None)
+    }
+  }
 }
