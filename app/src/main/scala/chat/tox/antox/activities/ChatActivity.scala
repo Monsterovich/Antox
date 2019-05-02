@@ -4,7 +4,7 @@ import java.io.{File, IOException}
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import android.app.Activity
+import android.app.{Activity, AlertDialog}
 import android.content.{Context, Intent}
 import android.net.Uri
 import android.os.{Build, Bundle, Environment, SystemClock}
@@ -13,6 +13,7 @@ import android.support.v4.content.CursorLoader
 import android.view.View
 import android.view.View.OnClickListener
 import android.widget._
+import android.content.DialogInterface
 import chat.tox.antox.R
 import chat.tox.antox.av.{Call, CameraUtils}
 import chat.tox.antox.data.State
@@ -31,6 +32,8 @@ import im.tox.tox4j.core.enums.ToxMessageType
 import im.tox.tox4j.exceptions.ToxException
 import rx.lang.scala.Subscription
 import rx.lang.scala.schedulers.{AndroidMainThreadScheduler, IOScheduler}
+
+import scala.runtime.Nothing$
 
 class ChatActivity extends GenericChatActivity[FriendKey] {
 
@@ -72,34 +75,55 @@ class ChatActivity extends GenericChatActivity[FriendKey] {
           return
         }
 
-        val path = Environment.getExternalStorageDirectory
-        val properties: DialogProperties = new DialogProperties()
-        properties.selection_mode = DialogConfigs.SINGLE_MODE
-        properties.selection_type = DialogConfigs.FILE_SELECT
-        properties.root = path
-        properties.error_dir = path
-        properties.extensions = null
-        val dialog: FilePickerDialog = new FilePickerDialog(thisActivity, properties)
-        dialog.setTitle(R.string.select_file)
+        var save_path = Environment.getDataDirectory
+        val pathChooser = new AlertDialog.Builder(thisActivity)
+          .setTitle("Choose the path to open")
 
-        dialog.setDialogSelectionListener(new DialogSelectionListener() {
-          override def onSelectedFilePaths(files: Array[String]) = {
-            // files is the array of the paths of files selected by the Application User.
-            // since we only want single file selection, use the first entry
-            if (files != null) {
-              if (files.length > 0) {
-                if (files(0) != null) {
-                  if (files(0).length > 0) {
-                    val filePath: String = new File(files(0)).getAbsolutePath()
-                    State.transfers.sendFileSendRequest(filePath, activeKey, FileKind.DATA, ToxFileId.empty, thisActivity)
+        val selection = new Array[CharSequence](2)
+        selection(0) = "Internal memory"
+        selection(1) = "External memory"
+
+        pathChooser.setItems(selection, new DialogInterface.OnClickListener() {
+          override def onClick(dialog: DialogInterface, which: Int): Unit = {
+            which match {
+              case 0 =>
+                save_path = Environment.getExternalStorageDirectory
+              case 1 =>
+                // bad coding but it will do fine
+                save_path = new File("/storage")
+            }
+            val properties: DialogProperties = new DialogProperties()
+            val path = Environment.getExternalStorageDirectory
+            properties.selection_mode = DialogConfigs.SINGLE_MODE
+            properties.selection_type = DialogConfigs.FILE_SELECT
+            properties.root = save_path
+            properties.error_dir = path
+            properties.extensions = null
+            val dialog: FilePickerDialog = new FilePickerDialog(thisActivity, properties)
+            dialog.setTitle(R.string.select_file)
+
+            dialog.setDialogSelectionListener(new DialogSelectionListener() {
+              override def onSelectedFilePaths(files: Array[String]) = {
+                // files is the array of the paths of files selected by the Application User.
+                // since we only want single file selection, use the first entry
+                if (files != null) {
+                  if (files.length > 0) {
+                    if (files(0) != null) {
+                      if (files(0).length > 0) {
+                        val filePath: String = new File(files(0)).getAbsolutePath()
+                        State.transfers.sendFileSendRequest(filePath, activeKey, FileKind.DATA, ToxFileId.empty, thisActivity)
+                      }
+                    }
                   }
                 }
               }
-            }
+            })
+
+            dialog.show()
           }
         })
-
-        dialog.show()
+        pathChooser.create()
+        pathChooser.show()
       }
     })
 
