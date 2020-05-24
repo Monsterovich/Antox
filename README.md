@@ -1,3 +1,7 @@
+### This project is canceled
+
+I'm developing a new Tox client - Protox -> https://gitlab.com/Monsterovich/protox
+
 <img src="http://i.imgur.com/fFhygVw.png" width="400" height="185" />
 
 **Jenkins:** [![Build Status](https://build.tox.chat/job/antox_build_android_arm_release/badge/icon)](https://build.tox.chat/job/antox_build_android_arm_release/)
